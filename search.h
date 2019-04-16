@@ -81,32 +81,6 @@ static int tempBoard[SIZE][SIZE];     //临时棋盘
 static int board_know[SIZE][SIZE];    //试探棋盘
 static node markBoard[SIZE][SIZE];    //分数棋盘
 
-static void PrintTempBoard(int board[][SIZE]){
-        cout << " ";
-        for(int i = 1; i <= 9; i++) {
-                cout << " " << static_cast<char>(i + 'A' - 1);
-        }
-        cout << endl;
-        for(int i = 1; i <= 9; i++) {
-                cout << i;
-                for(int j = 1; j <= 9; j++) {
-                        switch (board[i][j])
-                        {
-                        case 0:
-                                cout << " -";
-                                break;
-                        case 1:
-                                cout << " *";
-                                break;
-                        case 2:
-                                cout << " O";
-                                break;
-                        }
-                }
-                cout << endl;
-        }
-}
-
 static void SaveBoard(int board1[][SIZE],int board2[][SIZE]){
         for(int i = 1; i <= 9; i++) {
                 for(int j = 1; j <= 9; j++) {
@@ -504,8 +478,6 @@ static int MonteCarloSearch(Data *data){         //随机走子，直到终局
                         while(1) {
                                 int flag1 = 0; //每次初始参数
                                 int flag2 = 0;
-                                //PrintTempBoard(tempBoard);
-                                //cout << endl;
                                 if(calEnd(tempBoard,ChessColor,OppoColor,&ChessZone,&OppoZone)) {
                                         int a = isEnd(ChessColor,tempBoard,jie,board_know);
                                         int b = isEnd(OppoColor,tempBoard,jie,board_know);

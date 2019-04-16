@@ -45,16 +45,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QPainter *p;
-    int board_temp[SIZE][SIZE];
-    int Step_temp;
-    int ChessNum_temp;
-    int OppoNum_temp;
-    int OppoNumKnow_temp;
-    int ChessColor_temp;
-    int OppoColor_temp;
-    int board_know_temp[SIZE][SIZE];                                //暂存
-    foolgo::FullBoard<foolgo::MAIN_BOARD_LEN> full_board_temp;      //暂存
-    int Step;                                                       //总步数
+    int step = 0;                                                   //总步数
     char DisplayBoard[11][11] = {0};                                //输出显示接口   0空白 1黑子 2白子 3黑子未落 4白子未落
     QString info;                                                   //控制台显示接口
     bool takeflag = 0;
@@ -62,6 +53,24 @@ private:
     bool TokenBoard[11][11] = {0};
     int current_mouse_index_x = 0;
     int current_mouse_index_y = 0;
+    struct STATE{
+        int board[SIZE][SIZE];
+        int board_know[SIZE][SIZE];
+        int ChessNum;
+        int OppoNum;
+        int OppoNumKnow;
+        int ChessColor;
+        int OppoColor;
+        Move jie;
+        Move bestMove;
+        char DisplayBoard[11][11];
+        QString info;
+        bool takeflag;
+        bool takedflag;
+        bool TokenBoard[11][11];
+        foolgo::FullBoard<foolgo::MAIN_BOARD_LEN> full_board;
+    };
+    STATE GAMING[300];
 };
 
 #endif // MAINWINDOW_H

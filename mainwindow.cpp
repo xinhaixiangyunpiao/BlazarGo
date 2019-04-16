@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
             );
     connect(ui->action_4,&QAction::triggered,
             [=]{
+                record();
                 info = ">>  new\n>>  black\n";
                 ChessColor = BLACK;
                 OppoColor = WHITE;
@@ -63,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
             );
     connect(ui->action_6,&QAction::triggered,
             [=]{
+                record();
                 info = ">>  new\n>>  white\n";
                 ChessColor = WHITE;
                 OppoColor = BLACK;
@@ -70,9 +72,35 @@ MainWindow::MainWindow(QWidget *parent) :
                 Oppo = foolgo::BLACK_FORCE;
             }
             );
-    /* 按钮事件 */
-    connect(ui->pushButton,&QPushButton::released,
+    connect(ui->action_3,&QAction::triggered,
             [=]{
+                for(int i = 1; i <= 9; i++) {
+                        for(int j = 1; j <= 9; j++) {
+                                board[i][j] = GAMING[1].board[i][j];
+                                board_know[i][j] = GAMING[1].board_know[i][j];
+                                DisplayBoard[i][j] = GAMING[1].DisplayBoard[i][j];
+                                TokenBoard[i][j] = GAMING[1].TokenBoard[i][j];
+                        }
+                }
+                ChessNum = GAMING[1].ChessNum;
+                OppoNum = GAMING[1].OppoNum;
+                OppoNumKnow = GAMING[1].OppoNumKnow;
+                ChessColor = GAMING[1].ChessColor;
+                OppoColor = GAMING[1].OppoColor;
+                jie.x = GAMING[1].jie.x;
+                jie.y = GAMING[1].jie.y;
+                bestMove.x = GAMING[1].bestMove.x;
+                bestMove.y = GAMING[1].bestMove.y;
+                takeflag = GAMING[1].takeflag;
+                takedflag = GAMING[1].takedflag;
+                full_board.Copy(GAMING[1].full_board);
+                info = GAMING[1].info;
+            }
+            );
+    /* 按钮事件 */
+    connect(ui->pushButton,&QPushButton::released,             //accept
+            [=]{
+                record();
                 if(board[bestMove.x][bestMove.y] == ChessColor) {
 
                 }else if(board[bestMove.x][bestMove.y] == NOSTONE) {   //如果是空
@@ -80,12 +108,10 @@ MainWindow::MainWindow(QWidget *parent) :
                         DisplayBoard[bestMove.x][bestMove.y] = ChessColor + '0';
                         full_board.PlayMove(foolgo::Move(Chess,convert(bestMove)));
                         ChessNum++;
-                        Step++;
                 }else if(board[bestMove.x][bestMove.y] == OppoColor) {  //如果是对手棋子
                         board[bestMove.x][bestMove.y] = ChessColor;
                         DisplayBoard[bestMove.x][bestMove.y] = ChessColor + '0';
                         ChessNum++;
-                        Step++;
                         OppoNumKnow--;
                         OppoNum--;
                 }
@@ -94,8 +120,9 @@ MainWindow::MainWindow(QWidget *parent) :
                 info += ">>  accept\n";
             }
             );
-    connect(ui->pushButton_2,&QPushButton::released,
+    connect(ui->pushButton_2,&QPushButton::released,        //refuse
             [=]{
+                record();
                 if(board[bestMove.x][bestMove.y] != OppoColor) {
                         board[bestMove.x][bestMove.y] = OppoColor;
                         DisplayBoard[bestMove.x][bestMove.y] = OppoColor + '0';
@@ -108,7 +135,7 @@ MainWindow::MainWindow(QWidget *parent) :
                 MoveThread.detach();
             }
             );
-    connect(ui->pushButton_3,&QPushButton::released,
+    connect(ui->pushButton_3,&QPushButton::released,        //move
             [=]{
                 record();
                 jie.x = 0;
@@ -118,18 +145,20 @@ MainWindow::MainWindow(QWidget *parent) :
                 MoveThread.detach();
             }
             );
-    connect(ui->pushButton_4,&QPushButton::released,
+    connect(ui->pushButton_4,&QPushButton::released,        //undo
             [=]{
                 undo();
             }
             );
-    connect(ui->pushButton_5,&QPushButton::released,
+    connect(ui->pushButton_5,&QPushButton::released,        //take
             [=]{
+                record();
                 if(takeflag){
                     (ui->centralWidget)->setMouseTracking(false);
                     (ui->frame_2)->setMouseTracking(false);
                     setMouseTracking(false);
                     takeflag = 0;
+                    (ui->pushButton_5)->setText("提子");
                     int num = 0;
                     char msg[256];
                     int index = 0;
@@ -188,13 +217,15 @@ MainWindow::MainWindow(QWidget *parent) :
                 current_mouse_index_y = 0;
             }
             );
-    connect(ui->pushButton_6,&QPushButton::released,     //  taked
+    connect(ui->pushButton_6,&QPushButton::released,        //taked
             [=]{
+                record();
                 if(takedflag){
                     (ui->centralWidget)->setMouseTracking(false);
                     (ui->frame_2)->setMouseTracking(false);
                     setMouseTracking(false);
                     takedflag = 0;
+                    (ui->pushButton_6)->setText("被提子");
                     int num = 0;
                     char msg[256];
                     int index = 0;
@@ -297,22 +328,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-void MainWindow::record(){
-        for(int i = 1; i <= 9; i++) {
-                for(int j = 1; j <= 9; j++) {
-                        board_temp[i][j] = board[i][j];
-                        board_know_temp[i][j] = board_know[i][j];
-                }
-        }
-        Step_temp = Step;
-        ChessNum_temp = ChessNum;
-        OppoNum_temp = OppoNum;
-        OppoNumKnow_temp = OppoNumKnow;
-        ChessColor_temp = ChessColor;
-        OppoColor_temp = OppoColor;
-        full_board_temp.Copy(full_board);
-}
-
 void MainWindow::InitGame(){
         terminal = 0;
         memset(board,0,sizeof(board));
@@ -325,7 +340,7 @@ void MainWindow::InitGame(){
                 board[i][10] = BORDER;
                 board[10][i] = BORDER;
         }              //边界赋上BORDER
-        Step = 0;
+        step = 0;
         ChessNum = 0;
         OppoNum = 0;
         OppoNumKnow = 0;
@@ -337,7 +352,6 @@ void MainWindow::InitGame(){
         cout << "seed:" << seed << std::endl; //get seed
         foolgo::ZobHasher<foolgo::MAIN_BOARD_LEN>::Init(seed);
         full_board.Init();
-        full_board_temp.Init();
         record();
 }
 
@@ -348,20 +362,60 @@ foolgo::PositionIndex MainWindow::convert(Move pMove){
         return result;
 }
 
-void MainWindow::undo(){
+void MainWindow::record(){
+        step++;
         for(int i = 1; i <= 9; i++) {
                 for(int j = 1; j <= 9; j++) {
-                        board[i][j] = board_temp[i][j];
-                        board_know[i][j] = board_know_temp[i][j];
+                        GAMING[step].board[i][j] = board[i][j];
+                        GAMING[step].board_know[i][j] = board_know[i][j];
+                        GAMING[step].DisplayBoard[i][j] = DisplayBoard[i][j];
+                        GAMING[step].TokenBoard[i][j] = TokenBoard[i][j];
                 }
         }
-        Step = Step_temp;
-        ChessNum = ChessNum_temp;
-        OppoNum = OppoNum_temp;
-        OppoNumKnow = OppoNumKnow_temp;
-        ChessColor = ChessColor_temp;
-        OppoColor = OppoColor_temp;
-        full_board.Copy(full_board_temp);
+        GAMING[step].ChessNum = ChessNum;
+        GAMING[step].OppoNum = OppoNum;
+        GAMING[step].OppoNumKnow = OppoNumKnow;
+        GAMING[step].ChessColor = ChessColor;
+        GAMING[step].OppoColor = OppoColor;
+        GAMING[step].jie.x = jie.x;
+        GAMING[step].jie.y = jie.y;
+        GAMING[step].bestMove.x = bestMove.x;
+        GAMING[step].bestMove.y = bestMove.y;
+        GAMING[step].takeflag = takeflag;
+        GAMING[step].takedflag = takedflag;
+        GAMING[step].full_board.Copy(full_board);
+        GAMING[step].info = info;
+}
+
+void MainWindow::undo(){
+    for(int i = 1; i <= 9; i++) {
+            for(int j = 1; j <= 9; j++) {
+                    board[i][j] = GAMING[step].board[i][j];
+                    board_know[i][j] = GAMING[step].board_know[i][j];
+                    DisplayBoard[i][j] = GAMING[step].DisplayBoard[i][j];
+                    TokenBoard[i][j] = GAMING[step].TokenBoard[i][j];
+            }
+    }
+    ChessNum = GAMING[step].ChessNum;
+    OppoNum = GAMING[step].OppoNum;
+    OppoNumKnow = GAMING[step].OppoNumKnow;
+    ChessColor = GAMING[step].ChessColor;
+    OppoColor = GAMING[step].OppoColor;
+    jie.x = GAMING[step].jie.x;
+    jie.y = GAMING[step].jie.y;
+    bestMove.x = GAMING[step].bestMove.x;
+    bestMove.y = GAMING[step].bestMove.y;
+    takeflag = GAMING[step].takeflag;
+    takedflag = GAMING[step].takedflag;
+    full_board.Copy(GAMING[step].full_board);
+    info = GAMING[step].info;
+    step--;
+}
+
+void MainWindow::timerUpDate(){
+    (ui->progressBar)->setValue(con.GetCurrentPercent());
+    (ui->label_7)->setText(info);
+    update();
 }
 
 void MainWindow::paintEvent(QPaintEvent*){
@@ -493,12 +547,6 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *m)
             TokenBoard[x_index][y_index] = 1;
         }
     }
-}
-
-void MainWindow::timerUpDate(){
-    (ui->progressBar)->setValue(con.GetCurrentPercent());
-    (ui->label_7)->setText(info);
-    update();
 }
 
 MainWindow::~MainWindow()
